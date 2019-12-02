@@ -3,12 +3,16 @@ package com.example
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.client.*
-import io.ktor.client.engine.apache.*
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.html.*
 import io.ktor.http.HttpMethod
+import io.ktor.http.Url
 import io.ktor.response.respondRedirect
 import io.ktor.routing.*
 import kotlinx.html.*
+import java.net.URL
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -18,7 +22,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 fun Application.module(testing: Boolean = false) {
     install(Authentication) {
         oauth(COGNITO) {
-            client = HttpClient(Apache)
+            client = HttpClient()
             providerLookup = {
                 val domain = getEnv("cognito.domain")
                 OAuthServerSettings.OAuth2ServerSettings(
@@ -40,10 +44,15 @@ fun Application.module(testing: Boolean = false) {
                 if (principal == null) {
                     call.respondRedirect("http://localhost:8080/")
                 } else {
+                    val domain = getEnv("cognito.domain")
+                    val client = HttpClient()
+                    val result = client.get<String>("$domain/oauth2/userInfo") {
+                        header("Authorization", "Bearer ${principal.accessToken}")
+                    }
                     call.respondHtml {
                         body {
                             h1 { +"you are login." }
-                            a { +"access token is ${principal.accessToken}" }
+                            a { +result }
                         }
                     }
                 }

@@ -41,7 +41,4 @@ dependencies {
 
     // https://mvnrepository.com/artifact/io.ktor/ktor-client-apache
     compile "io.ktor:ktor-client-apache:$ktor_version"
-
-    // https://mvnrepository.com/artifact/io.ktor/ktor-locations
-    compile "io.ktor:ktor-locations:$ktor_version"
 }
